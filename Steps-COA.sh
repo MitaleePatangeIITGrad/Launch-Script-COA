@@ -16,7 +16,7 @@ DBSUBNETNAME=coa-mrp-subnet
 DBINSTANCEIDENTIFIER=coa-mysql-wordpress-db
 DBUSERNAME=controller
 DBPASSWORD=ilovebunnies
-DBNAME=wordpress-db
+DBNAME=wordpressdb
 SUBNET1=subnet-14fcce3f
 SUBNET2=subnet-1e5e7547
 TOPICNAME=coa-notify-mrp
@@ -25,8 +25,10 @@ PHONENUMBER=19143193344
 
 #Step 1a: Launch the instances and provide the user-data via the install-env.sh
 
+echo -e "\n Launching Instances"
+
 declare -a INSTANCELIST 
-INSTANCELIST=(`aws ec2 run-instances --image-id $1 --count $2 --instance-type $3 --security-group-ids $4 --subnet-id $5 --key-name $6 --associate-public-ip-address --iam-instance-profile Name=$7 --user-data file://../Environment_COA/install-env.sh --output text | grep INSTANCES | awk {' print $7'}`)
+INSTANCELIST=(`aws ec2 run-instances --image-id $1 --count $2 --instance-type $3 --security-group-ids $4 --subnet-id $5 --key-name $6 --associate-public-ip-address --iam-instance-profile Name=$7 --user-data file://../Environment-COA/install-env.sh --output text | grep INSTANCES | awk {' print $7'}`)
 
 for i in {0..60}; do echo -ne '.'; sleep 1;done
 
@@ -38,6 +40,7 @@ for i in {0..15}; do echo -ne '.'; sleep 1;done
 echo -e "\n The instance ids are \n" ${INSTANCELIST[@]}
 
 echo -e "\n Finished launching EC2 Instances, waiting for the instances to be in running state and sleeping 60 seconds"
+
 for i in {0..60}; do echo -ne '.'; sleep 1;done
 
 aws ec2 wait instance-running --instance-ids ${INSTANCELIST[@]} 
@@ -75,7 +78,7 @@ for i in {0..25}; do echo -ne '.'; sleep 1;done
 #Step 3a: Configure launch configuration
 
 echo -e "\n Creating Launch Configuration"
-aws autoscaling create-launch-configuration --launch-configuration-name $LAUNCHCONFNAME --iam-instance-profile $7 --user-data file://../Environment_FinalMP/install-env.sh --key-name $6 --instance-type $3 --security-groups $4 --image-id $1
+aws autoscaling create-launch-configuration --launch-configuration-name $LAUNCHCONFNAME --iam-instance-profile $7 --user-data file://../Environment-COA/install-env.sh --key-name $6 --instance-type $3 --security-groups $4 --image-id $1
 
 echo -e "\n Finished launching configuration and sleeping 25 seconds"
 for i in {0..25}; do echo -ne '.'; sleep 1;done
